@@ -50,7 +50,8 @@ function StarButton({ snippetId }: { snippetId: string }) {
   }, [snippetId, isSignedIn, userId]);
 
   // Handle starring/unstarring
-  const handleStar = async () => {
+  const handleStar = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!isSignedIn || isLoading || isMutating) {
       if (!isSignedIn) {
         toast.error("Please sign in to star snippets.");

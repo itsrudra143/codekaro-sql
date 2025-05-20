@@ -6,42 +6,20 @@ import ThemeSelector from "./ThemeSelector";
 import LanguageSelector from "./LanguageSelector";
 import RunButton from "./RunButton";
 import HeaderProfileBtn from "./HeaderProfileBtn";
-import React, { useEffect, useState, useCallback } from "react";
-
-const fetchUserProStatus = async (): Promise<boolean> => {
-  try {
-    const response = await fetch("/api/users/status");
-    if (!response.ok) {
-      // If response is not OK (e.g. 401, 500), assume not Pro or handle error
-      console.error(`Error fetching pro status: ${response.status}`);
-      const errorData = await response.json().catch(() => null); // Try to parse error, ignore if not JSON
-      if (errorData && typeof errorData.isPro === 'boolean') return errorData.isPro; // API might return isPro:false on error
-      return false;
-    }
-    const data = await response.json();
-    return data.isPro || false; // Ensure it returns a boolean
-  } catch (error) {
-    console.error("Failed to fetch user pro status:", error);
-    return false; // Default to not Pro on network error or other issues
-  }
-};
+import React, { useEffect } from "react";
+import { useUserStatusStore } from "@/store/useUserStatusStore";
 
 function Header() {
   const { user, isSignedIn } = useUser();
-  const [isProUser, setIsProUser] = useState(false);
-
-  const checkProStatus = useCallback(async () => {
-    if (isSignedIn) {
-      const proStatus = await fetchUserProStatus();
-      setIsProUser(proStatus);
-    } else {
-      setIsProUser(false); // Not pro if not signed in
-    }
-  }, [isSignedIn]);
+  const { isPro, fetchUserProStatus, clearProStatus } = useUserStatusStore();
 
   useEffect(() => {
-    checkProStatus();
-  }, [checkProStatus]);
+    if (isSignedIn && user?.id) {
+      fetchUserProStatus(user.id);
+    } else if (!isSignedIn) {
+      clearProStatus();
+    }
+  }, [isSignedIn, user?.id, fetchUserProStatus, clearProStatus]);
 
   return (
     <div className="relative z-10">
@@ -92,10 +70,10 @@ function Header() {
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-3">
             <ThemeSelector />
-            <LanguageSelector hasAccess={isProUser} />
+            <LanguageSelector hasAccess={isPro === true} />
           </div>
 
-          {!isProUser && isSignedIn && (
+          {!isPro && isSignedIn && (
             <Link
               href="/pricing"
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/20 hover:border-amber-500/40 bg-gradient-to-r from-amber-500/10 

@@ -2,13 +2,11 @@ import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 
 function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState("");
   const [isSharing, setIsSharing] = useState(false);
   const { language, getCode } = useCodeEditorStore();
-  const router = useRouter();
 
   const handleShare = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,13 +33,11 @@ function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
-      const newSnippet = await response.json();
 
       toast.success("Snippet saved successfully!", { id: toastId });
       onClose();
       setTitle("");
 
-      router.push(`/snippets/${newSnippet.id}`);
 
     } catch (error) {
       console.error("Error creating snippet:", error);

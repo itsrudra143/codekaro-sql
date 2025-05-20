@@ -11,17 +11,17 @@ import {
 import { motion } from "framer-motion";
 import { UserResource } from "@clerk/types";
 import Image from "next/image";
-import { UserData, UserStats, Snippet } from "@/types";
-import { useEffect, useState } from "react";
+import { UserData, UserStats } from "@/types";
+import { useUserStatusStore } from "@/store/useUserStatusStore";
 
 interface ProfileHeaderProps {
   userStats: UserStats | null;
   userData: UserData | null;
   user: UserResource;
-  isPro: boolean;
 }
 
-function ProfileHeader({ userStats, userData, user, isPro }: ProfileHeaderProps) {
+function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
+  const { isPro } = useUserStatusStore();
   const starredCount = userStats?.totalStars ?? 0;
 
   const STATS_CONFIG = [
@@ -67,7 +67,7 @@ function ProfileHeader({ userStats, userData, user, isPro }: ProfileHeaderProps)
   ];
 
   if (!userData || !userStats) {
-    return null; 
+    return null;
   }
 
   return (
@@ -76,7 +76,7 @@ function ProfileHeader({ userStats, userData, user, isPro }: ProfileHeaderProps)
      border-gray-800/50 overflow-hidden shadow-lg shadow-black/30"
     >
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-[length:32px_32px] [mask-image:radial-gradient(ellipse_at_center,white,transparent_70%)]" />
-      
+
       <div className="relative flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
         <div className="relative group flex-shrink-0">
           <div
@@ -90,7 +90,7 @@ function ProfileHeader({ userStats, userData, user, isPro }: ProfileHeaderProps)
             alt="Profile Picture"
             className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-gray-800/60 relative z-10 group-hover:scale-105 transition-transform duration-300 bg-gray-700"
           />
-          {isPro && (
+          {isPro === true && (
             <motion.div
               initial={{ scale: 0, rotate: -45 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -107,7 +107,7 @@ function ProfileHeader({ userStats, userData, user, isPro }: ProfileHeaderProps)
             <h1 className="text-2xl sm:text-3xl font-bold text-white truncate max-w-xs sm:max-w-md">
               {userData.name}
             </h1>
-            {isPro && (
+            {isPro === true && (
               <span className="flex-shrink-0 px-2.5 py-0.5 bg-purple-500/10 text-purple-400 rounded-full text-xs sm:text-sm font-medium">
                 Pro Member
               </span>
@@ -140,7 +140,7 @@ function ProfileHeader({ userStats, userData, user, isPro }: ProfileHeaderProps)
               <div className="relative p-4 sm:p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="min-w-0">
-                     <p className="text-sm font-medium text-gray-400 mb-1">
+                    <p className="text-sm font-medium text-gray-400 mb-1">
                       {stat.label}
                     </p>
                     <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight truncate">
@@ -148,7 +148,7 @@ function ProfileHeader({ userStats, userData, user, isPro }: ProfileHeaderProps)
                         ? value.toLocaleString()
                         : value}
                     </h3>
-                   <p className="text-xs text-gray-500 mt-1 truncate">
+                    <p className="text-xs text-gray-500 mt-1 truncate">
                       {stat.description}
                     </p>
                   </div>

@@ -12,14 +12,6 @@ const GetInTouch = () => {
       email: "rudrakshi747.be22@chitkara.edu.in",
     },
     {
-      name: "Rudraksh Kapoor",
-      roll: "2210990746",
-      group: "G12",
-      github: "https://github.com/ItsRudraksh",
-      linkedin: "https://www.linkedin.com/in/rudraksh-kapoor/",
-      email: "rudraksh746.be22@chitkara.edu.in",
-    },
-    {
       name: "Sakshi Rana",
       roll: "2210990769",
       group: "G12",
@@ -45,14 +37,13 @@ const GetInTouch = () => {
         ready to help you on your coding journey.
       </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+      <div className="grid grid-cols-3 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {teamMembers.map((member, index) => (
           <div
             key={index}
             className="relative group flex flex-col items-center gap-4 px-6 py-8 rounded-lg text-gray-300 bg-gray-800/50 
               hover:bg-blue-500/10 border border-gray-800 hover:border-blue-500/50 transition-all duration-300 shadow-lg overflow-hidden cursor-pointer"
-            onClick={() => window.open(member.github, "_blank")}
-          >
+            onClick={() => window.open(member.github, "_blank")}>
             <div
               className="absolute inset-0 bg-gradient-to-r from-blue-500/10 
               to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -72,8 +63,7 @@ const GetInTouch = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 hover:text-blue-400 transition-colors cursor-pointer"
-                onClick={(e) => e.stopPropagation()}
-              >
+                onClick={(e) => e.stopPropagation()}>
                 💻 GitHub
               </a>
               {member.linkedin !== "#" && (
@@ -82,8 +72,7 @@ const GetInTouch = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 hover:text-blue-400 transition-colors cursor-pointer"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                  onClick={(e) => e.stopPropagation()}>
                   🔗 LinkedIn
                 </a>
               )}
@@ -92,8 +81,7 @@ const GetInTouch = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 hover:text-blue-400 transition-colors cursor-pointer"
-                onClick={(e) => e.stopPropagation()}
-              >
+                onClick={(e) => e.stopPropagation()}>
                 📧 Email
               </a>
             </div>

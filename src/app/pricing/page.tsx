@@ -1,51 +1,30 @@
 "use client";
 import { useUser, SignedIn, SignedOut } from "@clerk/nextjs";
-import React, { useEffect, useState, useCallback } from "react";
-import ProPlanView from "./_components/ProPlanView"; // Assuming this component exists or will be created
-import NavigationHeader from "@/components/NavigationHeader"; // Adjust path as needed
-import { ENTERPRISE_FEATURES, FEATURES } from "./_constants"; // Assuming these exist or will be created
+import React, { useEffect } from "react";
+import ProPlanView from "./_components/ProPlanView";
+import NavigationHeader from "@/components/NavigationHeader";
+import { ENTERPRISE_FEATURES, FEATURES } from "./_constants";
 import { Star } from "lucide-react";
-import FeatureCategory from "./_components/FeatureCategory"; // Assuming these exist or will be created
-import FeatureItem from "./_components/FeatureItem"; // Assuming these exist or will be created
-import UpgradeButton from "./_components/UpgradeButton"; // Assuming this component exists or will be created
-import LoginButton from "@/components/LoginButton"; // Adjust path as needed
-
-const fetchUserProStatus = async (): Promise<boolean> => {
-  try {
-    const response = await fetch("/api/users/status");
-    if (!response.ok) {
-      console.error(`Error fetching pro status: ${response.status}`);
-      const errorData = await response.json().catch(() => null); // Try to parse error, ignore if not JSON
-      if (errorData && typeof errorData.isPro === 'boolean') return errorData.isPro; // API might return isPro:false on error
-      return false;
-    }
-    const data = await response.json();
-    return data.isPro || false;
-  } catch (error) {
-    console.error("Failed to fetch user pro status:", error);
-    return false;
-  }
-};
+import FeatureCategory from "./_components/FeatureCategory";
+import FeatureItem from "./_components/FeatureItem";
+import UpgradeButton from "./_components/UpgradeButton";
+import LoginButton from "@/components/LoginButton";
+import { useUserStatusStore } from "@/store/useUserStatusStore";
 
 function PricingPage() {
-  const { user, isSignedIn } = useUser();
-  const [isProUser, setIsProUser] = useState<boolean | null>(null);
-
-  const checkProStatus = useCallback(async () => {
-    if (isSignedIn) {
-      const proStatus = await fetchUserProStatus();
-      setIsProUser(proStatus);
-    } else {
-      setIsProUser(false); // Not pro if not signed in
-    }
-  }, [isSignedIn]);
+  const { isSignedIn, user } = useUser();
+  const { isPro, isLoadingProStatus, fetchUserProStatus, clearProStatus } =
+    useUserStatusStore();
 
   useEffect(() => {
-    checkProStatus();
-  }, [checkProStatus]);
+    if (isSignedIn && user?.id) {
+      fetchUserProStatus(user.id);
+    } else if (!isSignedIn) {
+      clearProStatus();
+    }
+  }, [isSignedIn, user?.id, fetchUserProStatus, clearProStatus]);
 
-  if (isProUser === null && isSignedIn) {
-    // Optional: Add a loading state
+  if (isLoadingProStatus && isSignedIn) {
     return (
       <div className="relative min-h-screen bg-[#0a0a0f] selection:bg-blue-500/20 selection:text-blue-200">
         <NavigationHeader />
@@ -56,7 +35,7 @@ function PricingPage() {
     );
   }
 
-  if (isProUser) {
+  if (isPro === true) {
     return <ProPlanView />;
   }
 

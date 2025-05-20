@@ -5,12 +5,14 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import NavigationHeader from '@/components/NavigationHeader'; // Adjust path as needed
 import Link from 'next/link';
+import { useUserStatusStore } from '@/store/useUserStatusStore'; // Import the store
 
 function PaymentStatusContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'pending_verification' | 'unknown'>('loading');
   const [message, setMessage] = useState<string | null>(null);
+  const { setProStatus } = useUserStatusStore(); // Get setProStatus action
 
   useEffect(() => {
     const razorpay_payment_id = searchParams.get('razorpay_payment_id');
@@ -48,6 +50,7 @@ function PaymentStatusContent() {
         if (data.success) {
           setStatus('success');
           setMessage(data.message || 'Payment successful! Your account has been upgraded.');
+          setProStatus(true); // <<< SET PRO STATUS HERE
           setTimeout(() => {
             router.push('/dashboard');
           }, 3000);
@@ -64,7 +67,7 @@ function PaymentStatusContent() {
     };
 
     verifyPaymentOnServer();
-  }, [searchParams, router]);
+  }, [searchParams, router, setProStatus]);
 
   const renderIcon = () => {
     switch (status) {

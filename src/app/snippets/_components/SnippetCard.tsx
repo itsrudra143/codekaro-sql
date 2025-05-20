@@ -12,8 +12,13 @@ import toast from "react-hot-toast";
 import StarButton from "@/components/StarButton"; // Assuming StarButton will be copied
 import { useRouter } from "next/navigation"; // Import for refresh
 
+interface SnippetCardProps {
+  snippet: Snippet;
+  onDeleteSuccess?: (snippetId: string) => void; // Add this prop
+}
+
 // TODO: Adapt Snippet type if necessary for Prisma model (e.g., _id -> id, _creationTime -> createdAt)
-function SnippetCard({ snippet }: { snippet: Snippet }) {
+function SnippetCard({ snippet, onDeleteSuccess }: SnippetCardProps) {
   const { user } = useUser();
   const router = useRouter();
   // const deleteSnippet = useMutation(api.snippets.deleteSnippet); // TODO: Replace with backend call
@@ -51,11 +56,12 @@ function SnippetCard({ snippet }: { snippet: Snippet }) {
       }
 
       toast.success("Snippet deleted", { id: toastId });
-      // Refresh data on the page after deletion
-      // A simple router.refresh() might work if the parent page uses server components
-      // or re-fetches on navigation. For client components, you might need a more
-      // sophisticated state management solution (like Zustand or passing a callback).
-      router.refresh();
+
+      if (onDeleteSuccess) {
+        onDeleteSuccess(snippet.id); // Call the callback
+      } else {
+        router.refresh(); // Fallback if no callback is provided
+      }
       // TODO: Improve refresh mechanism if needed (e.g., Zustand store update)
 
     } catch (error) {
@@ -121,34 +127,6 @@ function SnippetCard({ snippet }: { snippet: Snippet }) {
                 </div>
               </div>
               {/* Action Buttons (Star/Delete) */}
-              <div
-                className="absolute top-4 right-4 z-10 flex gap-2 items-center"
-                onClick={(e) => e.stopPropagation()} // Prevent event bubbling to the Link
-              >
-                {/* // TODO: Ensure StarButton uses snippet.id */}
-                <StarButton snippetId={snippet.id} />
-
-                {user?.id === snippet.userId && (
-                  <div className="z-10" onClick={(e) => e.preventDefault()}> {/* Prevent Link nav */}
-                    <button
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                      title="Delete Snippet"
-                      className={`group flex items-center justify-center size-8 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${isDeleting
-                        ? "bg-red-500/20 text-red-400"
-                        : "bg-gray-500/10 text-gray-400 hover:bg-red-500/10 hover:text-red-400"
-                        }
-                      `}
-                    >
-                      {isDeleting ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="size-4" />
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Content */}
@@ -178,6 +156,34 @@ function SnippetCard({ snippet }: { snippet: Snippet }) {
           </div>
         </div>
       </Link>
+
+      {/* Action Buttons (Star/Delete) - Positioned absolutely relative to motion.div */}
+      <div
+        className="absolute top-4 right-4 z-10 flex gap-2 items-center"
+      >
+        <StarButton snippetId={snippet.id} />
+
+        {user?.id === snippet.userId && (
+          <div className="z-10">
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              title="Delete Snippet"
+              className={`group flex items-center justify-center size-8 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${isDeleting
+                ? "bg-red-500/20 text-red-400"
+                : "bg-gray-500/10 text-gray-400 hover:bg-red-500/10 hover:text-red-400"
+                }
+              `}
+            >
+              {isDeleting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Trash2 className="size-4" />
+              )}
+            </button>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }

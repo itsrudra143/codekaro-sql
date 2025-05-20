@@ -51,6 +51,12 @@ function SnippetsPage() {
     fetchSnippets();
   }, []);
 
+  const handleDeleteSnippet = (deletedSnippetId: string) => {
+    setSnippets((prevSnippets) =>
+      prevSnippets ? prevSnippets.filter(snippet => snippet.id !== deletedSnippetId) : null
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0a0a0f]">
@@ -230,7 +236,7 @@ function SnippetsPage() {
         >
           <AnimatePresence mode="popLayout">
             {filteredSnippets.map((snippet) => (
-              <SnippetCard key={snippet.id} snippet={snippet} />
+              <SnippetCard key={snippet.id} snippet={snippet} onDeleteSuccess={handleDeleteSnippet} />
             ))}
           </AnimatePresence>
         </motion.div>

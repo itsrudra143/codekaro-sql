@@ -22,6 +22,7 @@ import CodeBlock from "@/app/snippets/[id]/_components/CodeBlock"; // Reuse exis
 import { Snippet, CodeExecution, UserData, UserStats } from "@/types"; // Assume types exist
 import toast from "react-hot-toast"; // Import toast
 import SnippetCard from "@/app/snippets/_components/SnippetCard"; // Import SnippetCard
+import { useUserStatusStore } from "@/store/useUserStatusStore"; // Corrected path
 
 const TABS = [
   {
@@ -66,51 +67,52 @@ function ProfilePage() {
     canLoadMore: false,
   });
   const [error, setError] = useState<string | null>(null); // Combined error state
-  const [isProStatus, setIsProStatus] = useState<boolean>(false); // State for isPro status
 
   // --- Data Fetching Logic ---
+  const { fetchUserProStatus, clearProStatus } = useUserStatusStore(); // Get store actions
+
   useEffect(() => {
     if (!user?.id) {
       if (isLoaded) {
         router.push("/");
       }
+      clearProStatus(); // Clear pro status if no user ID
       return;
     }
+
+    fetchUserProStatus(user.id); // Fetch pro status from store action
 
     const initialFetch = async () => {
       setIsLoadingProfile(true);
       setError(null);
       try {
         const userId = user.id;
-        // Fetch stats, starred snippets, pro status, and first page of executions in parallel
-        const [statsRes, starredRes, proStatusRes, execRes] = await Promise.all([
+        // Fetch stats, starred snippets, and first page of executions in parallel
+        // Pro status is now handled by useUserStatusStore, so removed proStatusRes
+        const [statsRes, starredRes, execRes] = await Promise.all([
           fetch(`/api/users/${userId}/stats`),
           fetch(`/api/users/${userId}/starred-snippets`),
-          fetch(`/api/users/status`), // Fetch pro status
           fetch(`/api/users/${userId}/executions?page=1&limit=${executionPagination.limit}`),
         ]);
 
         // Check responses
         if (!statsRes.ok) throw new Error("Failed to load user stats");
         if (!starredRes.ok) throw new Error("Failed to load starred snippets");
-        if (!proStatusRes.ok) throw new Error("Failed to load pro status");
         if (!execRes.ok) throw new Error("Failed to load code executions");
 
         // Parse data
         const statsData: UserStats = await statsRes.json();
         const starredData: Snippet[] = await starredRes.json();
-        const proStatusData: { isPro: boolean } = await proStatusRes.json();
         const execData: { executions: CodeExecution[], pagination: typeof executionPagination } = await execRes.json();
 
+        // isPro is now from the store, directly used by ProfileHeader
         // Construct UserData from Clerk user object
-        setIsProStatus(proStatusData.isPro); // Set the dedicated isPro state
         const currentData: UserData = {
           id: userId,
           userId: userId,
           email: user.primaryEmailAddress?.emailAddress || "",
           name: user.fullName || "User",
-          isPro: proStatusData.isPro, // Use fetched pro status
-          // Handle potential null values from Clerk user
+          isPro: useUserStatusStore.getState().isPro || false, // Get current isPro from store for UserData if needed elsewhere
           createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
           updatedAt: user.updatedAt ? new Date(user.updatedAt) : new Date(),
         };
@@ -141,6 +143,12 @@ function ProfilePage() {
 
     initialFetch();
   }, [user?.id, isLoaded, router, executionPagination.limit]); // Rerun if user or limit changes
+
+  const handleDeleteStarredSnippet = (deletedSnippetId: string) => {
+    setStarredSnippets((prevSnippets) =>
+      prevSnippets ? prevSnippets.filter(snippet => snippet.id !== deletedSnippetId) : null
+    );
+  };
 
   // --- Load More Executions ---
   const loadMoreExecutions = async () => {
@@ -208,7 +216,6 @@ function ProfilePage() {
           userStats={userStats}
           userData={userData}
           user={user} // Pass the loaded Clerk user object
-          isPro={isProStatus} // Pass the fetched isPro status
         />
 
         {/* Tabs & Content */}
@@ -411,11 +418,10 @@ function ProfilePage() {
                   {starredSnippets && starredSnippets.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {starredSnippets.map((snippet) => (
-                        <SnippetCard key={snippet.id} snippet={snippet} />
+                        <SnippetCard key={snippet.id} snippet={snippet} onDeleteSuccess={handleDeleteStarredSnippet} />
                       ))}
                     </div>
-                  )
-                  }
+                  )}
                 </div>
               )}
             </motion.div>
