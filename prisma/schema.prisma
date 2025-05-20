@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String          @id @default(uuid())
+  userId                String          @unique
+  email                 String          @unique
+  name                  String
+  isPro                 Boolean         @default(false)
+  proSince              DateTime?
+  razorpayOrderId       String?
+  razorpayPaymentId     String?
+  razorpaySignature     String?
+  codeExecutions        CodeExecution[]
+  snippets              Snippet[]
+  stars                 Star[]
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+model CodeExecution {
+  id        String   @id @default(uuid())
+  userId    String
+  language  String
+  code      String   @db.Text
+  output    String?  @db.Text
+  error     String?  @db.Text
+  user      User     @relation(fields: [userId], references: [userId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Snippet {
+  id        String           @id @default(uuid())
+  userId    String
+  title     String
+  language  String
+  code      String           @db.Text
+  userName  String
+  user      User             @relation(fields: [userId], references: [userId])
+  comments  SnippetComment[]
+  stars     Star[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([userId])
+}
+
+model SnippetComment {
+  id        String   @id @default(uuid())
+  snippetId String
+  userId    String
+  userName  String
+  content   String   @db.Text
+  snippet   Snippet  @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([snippetId])
+}
+
+model Star {
+  id        String   @id @default(uuid())
+  userId    String
+  snippetId String
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  snippet   Snippet  @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, snippetId])
+  @@index([userId])
+  @@index([snippetId])
+}

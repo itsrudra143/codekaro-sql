@@ -1,0 +1,45 @@
+{
+  "name": "code-karo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.10.2",
+    "@clerk/themes": "^2.2.20",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
+    "@monaco-editor/react": "^4.6.0",
+    "@prisma/client": "^6.4.1",
+    "framer-motion": "^12.1.0",
+    "lucide-react": "^0.474.0",
+    "next": "15.1.6",
+    "razorpay": "^2.9.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^15.6.1",
+    "remark-gfm": "^4.0.1",
+    "svix": "^1.45.1",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.6",
+    "postcss": "^8",
+    "prisma": "^6.4.1",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
